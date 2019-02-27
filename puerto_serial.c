@@ -48,6 +48,7 @@ void incializar_esp8266(){
     return;
 }
 
+
 void uart_espera_paquete(){
     #if DEBUG_SERIAL
     DB1_Write(1u);
