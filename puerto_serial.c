@@ -74,89 +74,103 @@ void uart_espera_paquete(){
 //    }    
     uint16_t rx_buffer_size = UART_ESP_GetRxBufferSize();
     
-    if(rx_buffer_size > 0){ 
-        /*Leemos el registro de estado del UART*/
-        //rec_status = UART_ESP_RXSTATUS_REG;
-        /*Verificamos que hayan datos dentro del buffer del UART*/
-        //if(rec_status & UART_ESP_RX_STS_FIFO_NOTEMPTY){
-        if(1==1){
-            /*Se extrae el byte recibido del HW UART*/
-            rec_data = UART_ESP_ReadRxData();
-            
-            /*Si se trata de recepcion de datos, se verfica que no hubo error*/
-            if(b_cmd_recibir_datos == 1 && num_bytes_recibidos == 0 && rec_data == CMD_RESP_OK){
-                b_cmd_recibir_datos_ok = 1;
-            }
-            
-            /*Se lleva la cuenta de las comas y se guarda la posicion de la primera y segunda, despues 
-            de eso ya no entra aqui, solo cuando se termino de procesar el paquete.*/
-            if( (b_cmd_recibir_datos == 1) && (b_cmd_recibir_datos_ok == 1) && (rec_data == ',') && (b_par_coma == 0) ){
-            	if(cantidad_comas == 0){
-            		pos_primera_coma = num_bytes_recibidos;
-            	}
-            	if(cantidad_comas == 1){
-            		pos_segunda_coma = num_bytes_recibidos;
-                    /*Indica que ya se encontraron el par de comas*/
-            		b_par_coma = 1;
-            	}
-        	    cantidad_comas++;
-            }
-            
-            /*Si se trata de recepcion de datos, se almacena la cantidad de bytes a recibir*/
-            /*Agregar verificacion de si lo que se esta guardando es efectivamente un numero*/
-            if( (b_cmd_recibir_datos == 1) && (b_cmd_recibir_datos_ok == 1) && (rec_data != ',') && (cantidad_comas  > 0) && ( cantidad_comas < 2)){
-                /*Falta agregar verificacion de que el caracter que se va almacenar es efectivamente un numero.*/
-                buffer_tam_paquete_datos[indice_buffer_tam_paquete_datos++] = rec_data;
-            }
-          
-            /* Se verifica que la cantidad de bytes este presente y sea un numero valido*/
-            if( (b_cmd_recibir_datos == 1) && (b_cmd_recibir_datos_ok == 1) && (b_par_coma == 1) && (b_tam_paquete_recibido == 0)){
-                buffer_tam_paquete_datos[indice_buffer_tam_paquete_datos] = '\0';
-    			tam_paquete_datos_tcp = atoi((char*)buffer_tam_paquete_datos);
-    	        b_tam_paquete_recibido = 1;
-    		}
-            
-            /*Se verifica si lo que se va a recibir son datos o u otro comando*/
-            if((b_cmd_recibir_datos == 1) && (b_cmd_recibir_datos_ok == 1) && 
-            (b_tam_paquete_recibido == 1) && (num_bytes_recibidos > pos_segunda_coma) )
+    if(rx_buffer_size > 0)
+    { 
+        /*Se extrae el byte recibido del HW UART*/
+        rec_data = UART_ESP_ReadRxData();
+        
+        /*Si se trata de recepcion de datos, se verfica que no hubo error*/
+        if(b_cmd_recibir_datos == 1 && num_bytes_recibidos == 0 
+            && rec_data == CMD_RESP_OK)
+        {
+            b_cmd_recibir_datos_ok = 1;
+        }
+        
+        /*Se lleva la cuenta de las comas y se guarda la posicion de la primera 
+        y segunda, despues de eso ya no entra aqui, solo cuando se termino de 
+        procesar el paquete.*/
+        if( (b_cmd_recibir_datos == 1) && (b_cmd_recibir_datos_ok == 1) 
+            && (rec_data == ',') && (b_par_coma == 0) )
+        {
+        	if(cantidad_comas == 0)
             {
-                /*Se va leer datos del comando SOR*/
-                if(cantidad_caracteres_paquete_datos_tcp < tam_paquete_datos_tcp)
+        		pos_primera_coma = num_bytes_recibidos;
+        	}
+        	if(cantidad_comas == 1)
+            {
+        		pos_segunda_coma = num_bytes_recibidos;
+                /*Indica que ya se encontraron el par de comas*/
+        		b_par_coma = 1;
+        	}
+    	    cantidad_comas++;
+        }
+        
+        /*Si se trata de recepcion de datos, se almacena la cantidad de bytes 
+        a recibir*/
+        /*Agregar verificacion de si lo que se esta guardando es efectivamente un numero*/
+        if( (b_cmd_recibir_datos == 1) && (b_cmd_recibir_datos_ok == 1) 
+            && (rec_data != ',') && (cantidad_comas  > 0) && ( cantidad_comas < 2))
+        {
+            /*Falta agregar verificacion de que el caracter que se va almacenar 
+            es efectivamente un numero.*/
+            buffer_tam_paquete_datos[indice_buffer_tam_paquete_datos++] = rec_data;
+        }
+      
+        /* Se verifica que la cantidad de bytes este presente y sea un numero valido*/
+        if( (b_cmd_recibir_datos == 1) && (b_cmd_recibir_datos_ok == 1) 
+            && (b_par_coma == 1) && (b_tam_paquete_recibido == 0))
+        {
+            buffer_tam_paquete_datos[indice_buffer_tam_paquete_datos] = '\0';
+			tam_paquete_datos_tcp = atoi((char*)buffer_tam_paquete_datos);
+	        b_tam_paquete_recibido = 1;
+		}
+        
+        /*Se verifica si lo que se va a recibir son datos o u otro comando*/
+        if((b_cmd_recibir_datos == 1) && (b_cmd_recibir_datos_ok == 1) && 
+            (b_tam_paquete_recibido == 1) && (num_bytes_recibidos > pos_segunda_coma))
+        {
+            /*Se va leer datos del comando SOR*/
+            if(cantidad_caracteres_paquete_datos_tcp < tam_paquete_datos_tcp)
+            {
+                /*Se guardan los datos TCP recibidos*/
+                //circ_bbuf_push(&sCircBuff,rec_data);
+                g_tcp_rx_buffer[cantidad_caracteres_paquete_datos_tcp] = rec_data; 
+                cantidad_caracteres_paquete_datos_tcp++;
+            }else
+            {
+                /*Ya se alcanzo la cantidad de bytes especificada*/
+                if(rec_data == CMD_TERMINATOR)
                 {
-                    /*Se guardan los datos TCP recibidos*/
-                    //circ_bbuf_push(&sCircBuff,rec_data);
-                    g_tcp_rx_buffer[cantidad_caracteres_paquete_datos_tcp] = rec_data; 
-                    cantidad_caracteres_paquete_datos_tcp++;
-                }else{
-                    /*Ya se alcanzo la cantidad de bytes especificada*/
-                    if(rec_data == CMD_TERMINATOR){
-                        /*Se encontro el terminador(\n)*/
-                        b_paquete_serial_recibido  = 1; 
-                    }else{
-                        /*No se encontro el caracter terminador,informar 
-                        error de formato en el paquete*/
-                    }
-                    posicion_comienzo_datos = pos_segunda_coma + 1; 
-                    b_cmd_recibir_datos_ok = 0;
-                    b_par_coma = 0;
-                    b_tam_paquete_recibido = 0;
-                    cantidad_comas = 0;
-                    pos_primera_coma = 0;
-                    pos_segunda_coma = 0;
-                    indice_buffer_tam_paquete_datos = 0;
-                    memset(buffer_tam_paquete_datos,0,sizeof(buffer_tam_paquete_datos));
-                    cantidad_caracteres_paquete_datos_tcp = 0;
-                } 
-            }else{
-                /*Se leen los datos como siempre*/
-                if(rec_data == CMD_TERMINATOR){
                     /*Se encontro el terminador(\n)*/
-                    b_paquete_serial_recibido  = 1;    
-                }else{
-                    circ_bbuf_push(&sCircBuff,rec_data);
-                    num_bytes_recibidos++;
-                } 
-            }
+                    b_paquete_serial_recibido  = 1; 
+                }else
+                {
+                    /*No se encontro el caracter terminador,informar 
+                    error de formato en el paquete*/
+                }
+                posicion_comienzo_datos = pos_segunda_coma + 1; 
+                b_cmd_recibir_datos_ok = 0;
+                b_par_coma = 0;
+                b_tam_paquete_recibido = 0;
+                cantidad_comas = 0;
+                pos_primera_coma = 0;
+                pos_segunda_coma = 0;
+                indice_buffer_tam_paquete_datos = 0;
+                memset(buffer_tam_paquete_datos,0,sizeof(buffer_tam_paquete_datos));
+                cantidad_caracteres_paquete_datos_tcp = 0;
+            } 
+        }else
+        {
+            /*Se leen los datos como siempre*/
+            if(rec_data == CMD_TERMINATOR)
+            {
+                /*Se encontro el terminador(\n)*/
+                b_paquete_serial_recibido  = 1;    
+            }else
+            {
+                circ_bbuf_push(&sCircBuff,rec_data);
+                num_bytes_recibidos++;
+            } 
         }
     }
 retorno_interrupcion:
@@ -166,7 +180,8 @@ retorno_interrupcion:
     return;
 }
 
-void uart_enviar_datos(void *buffer, uint16_t tam){
+void uart_enviar_datos(void *buffer, uint16_t tam)
+{
     num_bytes_recibidos = 0;
     g_cmd_estado = cmd_recibiendo;
     if(1==1){
@@ -177,13 +192,15 @@ void uart_enviar_datos(void *buffer, uint16_t tam){
      
 }
 
-uint8_t uart_leer_datos(uint8_t *buffer){
+uint8_t uart_leer_datos(uint8_t *buffer)
+{
     uint8_t data;
     uint16_t i=0;
     
     /*Bloqueaante, se espera a recibir todo el paquete de respuesta del modulo,
     la rutina ISR del UART se encarga de setear la variable.*/
-    while(b_paquete_serial_recibido != 1){
+    while(b_paquete_serial_recibido != 1)
+    {
         uart_espera_paquete();
     }
     
@@ -192,7 +209,8 @@ uint8_t uart_leer_datos(uint8_t *buffer){
     
     /*Se limpia el buffer para recibir nuevos datos por el canal serial.*/
     i = sizeof(buffer); 
-    for(i = 0; i < sizeof(buffer); i++ ){
+    for(i = 0; i < sizeof(buffer); i++ )
+    {
         buffer[i] = (uint8)0; 
     }
      
@@ -202,9 +220,11 @@ uint8_t uart_leer_datos(uint8_t *buffer){
 //    }
     
     /*Se saca byte por byte del buffer circular*/
-    for(i = 0; i < num_bytes_recibidos; i++ ) {
+    for(i = 0; i < num_bytes_recibidos; i++ ) 
+    {
         /*Se verifica que existan datos*/
-        if(circ_bbuf_pop(&sCircBuff,&data) == -1){
+        if(circ_bbuf_pop(&sCircBuff,&data) == -1)
+        {
             /*Esta condicion nunca se debe cumplir, ya que deberia estar todo lo que se recibio*/
             LED_Write(1u);
             return 0;
@@ -221,34 +241,41 @@ uint8_t uart_leer_datos(uint8_t *buffer){
     return i;   
 }
 
-void initUART(){
+void initUART()
+{
     UART_ESP_Start();
 }
 
-void set_b_cmd_recibir_datos(){
+void set_b_cmd_recibir_datos()
+{
     b_cmd_recibir_datos = 1;
     return;
 }
 
-void rst_b_cmd_recibir_datos(){
+void rst_b_cmd_recibir_datos()
+{
     b_cmd_recibir_datos = 0;
     return; 
 }
 
-uint8_t get_posicion_comienzo_datos(){
+uint8_t get_posicion_comienzo_datos()
+{
     return posicion_comienzo_datos;
 }
 
-void rst_posicion_comienzo_datos(){
+void rst_posicion_comienzo_datos()
+{
     posicion_comienzo_datos = 0;
     return; 
 }
 
-uint16_t get_tam_paquete_datos_tcp(){
+uint16_t get_tam_paquete_datos_tcp()
+{
     return tam_paquete_datos_tcp;
 }
 
-void rst_tam_paquete_datos_tcp(){
+void rst_tam_paquete_datos_tcp()
+{
     tam_paquete_datos_tcp = 0;
 }
 
