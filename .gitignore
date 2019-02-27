@@ -1,0 +1,10 @@
+CortexM3/
+codegentemp/
+Export/
+Generated_Source/
+*.log
+*.cycdx
+*.cyfit
+*.rpt
+*.svd
+Design01_timing.html
