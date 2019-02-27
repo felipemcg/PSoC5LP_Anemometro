@@ -81,7 +81,7 @@ void uart_espera_paquete(){
         //if(rec_status & UART_ESP_RX_STS_FIFO_NOTEMPTY){
         if(1==1){
             /*Se extrae el byte recibido del HW UART*/
-            rec_data = UART_ESP_GetByte();
+            rec_data = UART_ESP_ReadRxData();
             
             /*Si se trata de recepcion de datos, se verfica que no hubo error*/
             if(b_cmd_recibir_datos == 1 && num_bytes_recibidos == 0 && rec_data == CMD_RESP_OK){
