@@ -760,8 +760,9 @@ void configServidor () {
  * 	Ninguno, las variables globales afectadas se actualizan.
  */
 void cierraSocketCliente (uint16_t id){
-	if (idSocketCliente)
+	if (idSocketCliente >= 0){
 	    esp8266_cierra_socket_tcp(idSocketCliente);
+    }
 	idSocketCliente = -1;	// indicamos que no hay cliente conectado
 }
 
