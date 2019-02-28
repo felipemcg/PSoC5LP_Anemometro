@@ -30,6 +30,7 @@ const char *hyperlink_index = "<!DOCTYPE html>\r\n"
 const char *cabeceraOK = 		"HTTP/1.1 200 OK\r\n";
 const char *cabContentType = 	"Content-Type: text/html; charset=utf-8\r\n";
 const char *cabContentLength = 	"Content-Length: %d\r\n";
+const char *cabCacheControl =   "Cache-control: no-cache\r\n";
 const char *finCabecera = 		"\r\n";
     
 const char *index_p = 	"<!DOCTYPE html>\r\n"

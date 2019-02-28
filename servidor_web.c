@@ -152,6 +152,7 @@ void salirFun(){
 	// Enviamos la redicción a index.html
 	strcpy (buffer_web_envio, redirect);
     sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (hyperlink_index));
+    strcat (buffer_web_envio,cabCacheControl);
 	strcat (buffer_web_envio, finCabecera);
     
     strcat (buffer_web_envio, hyperlink_index);
@@ -166,6 +167,7 @@ void indexFun (){
 	strcat (buffer_web_envio, cabContentType);
 	sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (index_p));
     strcat (buffer_web_envio, "Connection: keep-alive\r\n");
+    strcat (buffer_web_envio,cabCacheControl);
 	strcat (buffer_web_envio, finCabecera);
 
 	strcat (buffer_web_envio, index_p);
@@ -226,6 +228,7 @@ void configFormFun (){
 		strcat (buffer_web_envio, cabContentType);    
 		sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, 
         strlen (buffer_temporal));
+        strcat (buffer_web_envio,cabCacheControl);
 		strcat (buffer_web_envio, finCabecera);
         
         //Adjuntamos la pagina config_form con los parametros cargados.
@@ -246,6 +249,7 @@ void cambiarFormFun (){
 		strcpy (buffer_web_envio, cabeceraOK);
 		strcat (buffer_web_envio, cabContentType);
 		sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (cambiar_form));
+        strcat (buffer_web_envio,cabCacheControl);
 		strcat (buffer_web_envio, finCabecera);
 
 		strcat (buffer_web_envio, cambiar_form);
@@ -261,6 +265,7 @@ void notFoundFun (){
 	strcpy (buffer_web_envio, cabeceraNotFound);
 	strcat (buffer_web_envio, cabContentType);
 	sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (notFound));
+    strcat (buffer_web_envio,cabCacheControl);
 	strcat (buffer_web_envio, finCabecera);
 
 	strcat (buffer_web_envio, notFound);
@@ -282,6 +287,7 @@ void respConfigError(void){
 	strcpy (buffer_web_envio, cabeceraOK);
 	strcat (buffer_web_envio, cabContentType);
 	sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (errorConfig));
+    strcat (buffer_web_envio,cabCacheControl);
 	strcat (buffer_web_envio, finCabecera);
 
 	strcat (buffer_web_envio, errorConfig);
@@ -300,6 +306,7 @@ void respCambiarError(void){
 	strcpy (buffer_web_envio, cabeceraOK);
 	strcat (buffer_web_envio, cabContentType);
 	sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (errorCambiar));
+    strcat (buffer_web_envio,cabCacheControl);
 	strcat (buffer_web_envio, finCabecera);
 
 	strcat (buffer_web_envio, errorCambiar);
@@ -432,6 +439,7 @@ void configFun (char *c){
 					strcpy (buffer_web_envio, cabeceraOK);
 					strcat (buffer_web_envio, cabContentType);
 					sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (configCorrecta));
+                    strcat (buffer_web_envio,cabCacheControl);
 					strcat (buffer_web_envio, finCabecera);
 					strcat (buffer_web_envio, configCorrecta);
 
@@ -444,6 +452,7 @@ void configFun (char *c){
 					strcpy (buffer_web_envio, cabeceraOK);
 					strcat (buffer_web_envio, cabContentType);
 					sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (errorEEPROM));
+                    strcat (buffer_web_envio,cabCacheControl);
 					strcat (buffer_web_envio, finCabecera);
 
 					strcat (buffer_web_envio, errorEEPROM);
@@ -539,6 +548,7 @@ void cambiarFun(char *c){
 					strcpy (buffer_web_envio, cabeceraOK);
 					strcat (buffer_web_envio, cabContentType);
 					sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (cambiarCorrecta));
+                    strcat (buffer_web_envio,cabCacheControl);
 					strcat (buffer_web_envio, finCabecera);
 
 					strcat (buffer_web_envio, cambiarCorrecta);
@@ -549,6 +559,7 @@ void cambiarFun(char *c){
 					strcpy (buffer_web_envio, cabeceraOK);
 					strcat (buffer_web_envio, cabContentType);
 					sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (errorEEPROM));
+                    strcat (buffer_web_envio,cabCacheControl);
 					strcat (buffer_web_envio, finCabecera);
 
 					strcat (buffer_web_envio, errorEEPROM);
@@ -580,6 +591,7 @@ void respIngresoError(void){
 	strcpy (buffer_web_envio, cabeceraOK);
 	strcat (buffer_web_envio, cabContentType);
 	sprintf (&buffer_web_envio[strlen(buffer_web_envio)], cabContentLength, strlen (errorCambiar));
+    strcat (buffer_web_envio,cabCacheControl);
 	strcat (buffer_web_envio, finCabecera);
 
 	strcat (buffer_web_envio, errorCambiar);
