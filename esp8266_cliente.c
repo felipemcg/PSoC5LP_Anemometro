@@ -36,6 +36,12 @@ static bool b_app_cerrar_socket = false;
 
 static uint16_t tam_paquete_recibido_dato_tcp = 0;
 
+/*
+ * Timeouts. Múltiplo de 2 ms.
+ */
+#define TIMEOUT_RECONEXION_WIFI 150000  // Tiempo de espera para recon = 5 minutos.
+#define TIMEOUT_RECONEXION_SERVIDOR 90000 // Tiempo de espera para recon = 3 minutos.
+static volatile uint32_t contador_espera_reconexion = 0;
 
 /*Declaraciones de los estados*/
 void estado_encendido(void);
@@ -133,7 +139,8 @@ void estado_conectar_wifi(void){
         } 
         if(respuesta_esp == -2)
         {
-            estado_modulo_esp8266 = estado_espera_reconexion_wifi; 
+            estado_modulo_esp8266 = estado_espera_reconexion_wifi;
+            contador_espera_reconexion = 0; 
         }
         if( (respuesta_esp == -3) || (respuesta_esp == -4) ){
             estado_modulo_esp8266 = estado_espera_datos_portal_web;
@@ -150,7 +157,13 @@ void estado_espera_reconexion_wifi(){
     }
     else
     {
-        estado_modulo_esp8266 = estado_conectar_wifi;
+        if(contador_espera_reconexion > TIMEOUT_RECONEXION_WIFI)
+        {
+            estado_modulo_esp8266 = estado_conectar_wifi;
+        }else
+        {
+            estado_modulo_esp8266 = estado_espera_reconexion_wifi;
+        } 
     }
 } 
 
@@ -182,6 +195,7 @@ void estado_conectar_servidor_tcp(void){
         if(sock == -4)
         {
             estado_modulo_esp8266= estado_espera_reconexion_servidor;
+            contador_espera_reconexion = 0;
         }
     } 
 }
@@ -195,7 +209,13 @@ void estado_espera_reconexion_servidor(){
     }
     else
     {
-        estado_modulo_esp8266 = estado_conectar_servidor_tcp;
+        if(contador_espera_reconexion > TIMEOUT_RECONEXION_SERVIDOR)
+        {
+            estado_modulo_esp8266 = estado_conectar_servidor_tcp;
+        }else
+        {
+            estado_modulo_esp8266 = estado_espera_reconexion_servidor;
+        }
     }
 }
 
@@ -284,10 +304,19 @@ void estado_cerrar_socket_tcp(void){
     } 
 }
 
-void iniciar_me_esp8266_modo_cliente(){
-    estado_modulo_esp8266 = &estado_encendido;
+CY_ISR(contador_espera_reconexion_ISR){
+    Timer_espera_reconexion_ReadStatusRegister();
+    contador_espera_reconexion++;
+    isr_timer_reconexion_ClearPending();
+    return; 
 }
 
+void iniciar_me_esp8266_modo_cliente(){
+    estado_modulo_esp8266 = &estado_encendido;
+    isr_timer_reconexion_StartEx(contador_espera_reconexion_ISR);
+    Timer_espera_reconexion_Start();
+    contador_espera_reconexion = 0;
+}
 
 bool get_estado_wifi_tim(){
     return b_estado_wifi_tim;
@@ -382,5 +411,4 @@ uint16_t get_tam_paquete_recibido_dato_tcp(){
 void rst_tam_paquete_recibido_dato_tcp(){
     tam_paquete_recibido_dato_tcp = 0;
 }
-
 /* [] END OF FILE */
