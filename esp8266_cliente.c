@@ -249,6 +249,7 @@ void estado_escribir_datos_tcp(void){
     debug_enviar("\n");
     /*Se verifica que la aplicacion haya solicitado enviar datos*/
     respuesta_esp = esp8266_enviar_datos_tcp(sock,g_tam_tcp_tx,(char*)g_tcp_tx_buffer);
+    b_app_enviar_datos = 0;
     if(b_cambio_config == 0)
     {
         if(respuesta_esp == -2)
@@ -273,6 +274,7 @@ void estado_leer_datos_tcp(void){
     debug_enviar("ME-ESP8266 => Estado: Leer datos TCP => Tam paquete: ");
     debug_enviar(buffer_debug);
     debug_enviar("\n");
+    b_app_recibir_datos = 0;
     if(b_cambio_config == 0)
     {
         if(cant_bytes_tcp_recibidos >= 0)
@@ -293,6 +295,7 @@ void estado_cerrar_socket_tcp(void){
     debug_enviar("ME-ESP8266 => Estado: Cerrar coneccion servidor.");
     debug_enviar("\n");
     respuesta_esp = esp8266_cierra_socket_tcp(sock);
+    b_app_cerrar_socket = 0;
     if(b_cambio_config == 0)
     {
         if(respuesta_esp == 0)
