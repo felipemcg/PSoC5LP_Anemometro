@@ -848,91 +848,106 @@ void servidorWeb (){
         pagina_web_actual = ingreso;
 	}
 
-	// Ver si hay alguien que solicita conexión y aceptar, crear socket del cliente
-	if (idSocketCliente < 0)
+	/*Verificar en primer lugar que se tiene un socket valido de servidor para 
+    que sea posible poder aceptar clientes*/
+    if(idSocketServ >= 0)
     {
-        debug_enviar("SERVIDOR => Esperando cliente.");
-        debug_enviar("\n");
-		// si no hay cliente vemos si se conecto alguno
-		idSocketCliente = accept (idSocketServ);
-        if (idSocketCliente >= 0)
+        // Ver si hay alguien que solicita conexión y aceptar, crear socket del cliente
+    	if (idSocketCliente < 0)
         {
-            debug_enviar("SERVIDOR => Cliente conectado.");
+            debug_enviar("SERVIDOR => Esperando cliente.");
             debug_enviar("\n");
-        }
-	} 
-    else 
-    {
-		// Ver si hay datos para leer en el socket del cliente
-        cant_bytes_recibidos_tcp = esp8266_leer_datos_tcp(idSocketCliente,(unsigned char *)buffer_web_recibido);
-		if (cant_bytes_recibidos_tcp > 0)
-        {
-			// No hubo error
-			// ejecutamos el parser HTTP
-            sprintf(buffer_temporal,"SERVIDOR => Cantidad de bytes recibidos: %d\n", cant_bytes_recibidos_tcp);
-            int dump = 0;
-			if ((retHTTPparser = 
-                httpParser((unsigned char *)buffer_web_recibido, strlen(buffer_web_recibido), &datosHTTP)) == 0 || retHTTPparser == -5)
+    		// si no hay cliente vemos si se conecto alguno
+    		idSocketCliente = esp8266_aceptar_clientes_tcp (idSocketServ);
+            if (idSocketCliente >= 0)
             {
-//                debug_enviar("SERVIDOR => HEADER HTTP Recibido: \r\n");
-//                debug_enviar("Metodo: ");
-//                debug_enviar(datosHTTP.rl.method);
-//                debug_enviar("\r\n");
-//                debug_enviar("Objetivo:  ");
-//                debug_enviar(datosHTTP.rl.reqTarget);
-//                debug_enviar("\r\n");
-//                debug_enviar("Version:  ");
-//                debug_enviar(datosHTTP.rl.HTTPVersion);
-//                debug_enviar("\r\n");
-//                debug_enviar("Header fields: ");
-//                debug_enviar(datosHTTP.hf->fName);
-//                debug_enviar(datosHTTP.hf->fValue);
-//                debug_enviar("\r\n");
-//                debug_enviar("Cantidad Header fields:");
-//                itoa(datosHTTP.cantHF,buffer_itoa,10);
-//                debug_enviar(buffer_itoa);
-//                debug_enviar("\r\n");
-//                debug_enviar("Datos: "); 
-//                debug_enviar(datosHTTP.data);
-//                debug_enviar("\r\n");
-				// esperamos solamente GET y POST
-				if (strcmp(datosHTTP.rl.method, METODO_GET) == 0)
-                {
-//                    debug_enviar("SERVIDOR => Recibido metodo GET");
-//                    debug_enviar(datosHTTP.rl.method);
-//                    debug_enviar(datosHTTP.data);
-//                    debug_enviar("Parser:" );
-//                    itoa(retHTTPparser,buffer_itoa,10);
-//                    debug_enviar(buffer_itoa);
-					respuestaMetodoGet (&datosHTTP, retHTTPparser);
-				} 
-                else if (strcmp(datosHTTP.rl.method, METODO_POST) == 0)
-                {
-					respuestaMetodoPost (&datosHTTP, retHTTPparser);
-				} 
-                else 
-                {
-					//enviarRespuestaErrorMetodo ();	// informamos los métodos que aceptamos
-					esp8266_cierra_socket_tcp(idSocketCliente);
-				}
-			} 
-            else
+                debug_enviar("SERVIDOR => Cliente conectado.");
+                debug_enviar("\n");
+            }
+            if (idSocketCliente == -5)
             {
-				// Error en el parser HTTP
-				esp8266_cierra_socket_tcp(idSocketCliente);
-			}
-		}
+                debug_enviar("SERVIDOR => Servidor no encontrado.");
+                debug_enviar("\n");
+                idSocketServ = -1;
+            }
+            
+    	} 
         else 
         {
-            if(cant_bytes_recibidos_tcp == -3)
+    		// Ver si hay datos para leer en el socket del cliente
+            cant_bytes_recibidos_tcp = esp8266_leer_datos_tcp(idSocketCliente,(unsigned char *)buffer_web_recibido);
+    		if (cant_bytes_recibidos_tcp > 0)
             {
-                idSocketCliente = -1;
-            }
-			// ERROR al recibir paquete del ESP8266, procesar
-			//esp8266_cierra_socket_tcp(idSocketCliente);
-            
-		}
-	}
+    			// No hubo error
+    			// ejecutamos el parser HTTP
+                sprintf(buffer_temporal,"SERVIDOR => Cantidad de bytes recibidos: %d\n", cant_bytes_recibidos_tcp);
+                int dump = 0;
+    			if ((retHTTPparser = 
+                    httpParser((unsigned char *)buffer_web_recibido, strlen(buffer_web_recibido), &datosHTTP)) == 0 || retHTTPparser == -5)
+                {
+    //                debug_enviar("SERVIDOR => HEADER HTTP Recibido: \r\n");
+    //                debug_enviar("Metodo: ");
+    //                debug_enviar(datosHTTP.rl.method);
+    //                debug_enviar("\r\n");
+    //                debug_enviar("Objetivo:  ");
+    //                debug_enviar(datosHTTP.rl.reqTarget);
+    //                debug_enviar("\r\n");
+    //                debug_enviar("Version:  ");
+    //                debug_enviar(datosHTTP.rl.HTTPVersion);
+    //                debug_enviar("\r\n");
+    //                debug_enviar("Header fields: ");
+    //                debug_enviar(datosHTTP.hf->fName);
+    //                debug_enviar(datosHTTP.hf->fValue);
+    //                debug_enviar("\r\n");
+    //                debug_enviar("Cantidad Header fields:");
+    //                itoa(datosHTTP.cantHF,buffer_itoa,10);
+    //                debug_enviar(buffer_itoa);
+    //                debug_enviar("\r\n");
+    //                debug_enviar("Datos: "); 
+    //                debug_enviar(datosHTTP.data);
+    //                debug_enviar("\r\n");
+    				// esperamos solamente GET y POST
+    				if (strcmp(datosHTTP.rl.method, METODO_GET) == 0)
+                    {
+    //                    debug_enviar("SERVIDOR => Recibido metodo GET");
+    //                    debug_enviar(datosHTTP.rl.method);
+    //                    debug_enviar(datosHTTP.data);
+    //                    debug_enviar("Parser:" );
+    //                    itoa(retHTTPparser,buffer_itoa,10);
+    //                    debug_enviar(buffer_itoa);
+    					respuestaMetodoGet (&datosHTTP, retHTTPparser);
+    				} 
+                    else if (strcmp(datosHTTP.rl.method, METODO_POST) == 0)
+                    {
+    					respuestaMetodoPost (&datosHTTP, retHTTPparser);
+    				} 
+                    else 
+                    {
+    					//enviarRespuestaErrorMetodo ();	// informamos los métodos que aceptamos
+    					esp8266_cierra_socket_tcp(idSocketCliente);
+    				}
+    			} 
+                else
+                {
+    				// Error en el parser HTTP
+    				esp8266_cierra_socket_tcp(idSocketCliente);
+    			}
+    		}
+            else 
+            {
+                if(cant_bytes_recibidos_tcp == -3)
+                {
+                    idSocketCliente = -1;
+                }
+    			// ERROR al recibir paquete del ESP8266, procesar
+    			//esp8266_cierra_socket_tcp(idSocketCliente);
+                
+    		}
+    	}
+    }else
+    {
+        idSocketServ = esp8266_crear_servidor_tcp(80,1);
+    }
     if(pagina_web_actual == configuracion)
     {
         sprintf(timeout_web_cadena,"SERVIDOR => Contador de Timeout: %.3f seg.",0.002*timeoutWeb);
@@ -945,8 +960,3 @@ void servidorWeb (){
 struct configuracion obtener_configTIM(){
     return configTIM; 
 } 
-
-
-
-
-
