@@ -844,7 +844,7 @@ void servidorWeb (){
 	if ((timeoutWeb > TIMEOUT_ACTIVIDAD_WEB) && (pagina_web_actual == configuracion))
     {
 		// cerramos el socket cliente
-        debug_enviar("SERVIDOR => TIMEOUT! Se cierra el socket.");
+        debug_enviar("SERVIDOR => WEB Timeout.");
         debug_enviar("\n");
 		cierraSocketCliente (idSocketCliente);
 		timeoutWeb = 0;	// inicializamos contador
@@ -865,8 +865,8 @@ void servidorWeb (){
     		idSocketCliente = esp8266_aceptar_clientes_tcp (idSocketServ);
             if (idSocketCliente >= 0)
             {
-                debug_enviar("SERVIDOR => Cliente conectado.");
-                debug_enviar("\n");
+                sprintf(buffer_temporal,"SERVIDOR => Cliente conectado, socket = %d.\n",idSocketCliente);
+                debug_enviar(buffer_temporal);
             }
             if (idSocketCliente == -5)
             {
@@ -884,7 +884,8 @@ void servidorWeb (){
             {
     			// No hubo error
     			// ejecutamos el parser HTTP
-                sprintf(buffer_temporal,"SERVIDOR => Cantidad de bytes recibidos: %d\n", cant_bytes_recibidos_tcp);
+                sprintf(buffer_temporal,"SERVIDOR => Bytes recibidos: %d.\n", cant_bytes_recibidos_tcp);
+                debug_enviar(buffer_temporal);
                 int dump = 0;
     			if ((retHTTPparser = 
                     httpParser((unsigned char *)buffer_web_recibido, strlen(buffer_web_recibido), &datosHTTP)) == 0 || retHTTPparser == -5)
@@ -951,10 +952,12 @@ void servidorWeb (){
     }else
     {
         idSocketServ = esp8266_crear_servidor_tcp(80,1);
+        sprintf(buffer_temporal,"SERVIDOR => START WEBSRV: Socket = %d.\n",idSocketServ);
+        debug_enviar(buffer_temporal);
     }
     if(pagina_web_actual == configuracion)
     {
-        sprintf(timeout_web_cadena,"SERVIDOR => Contador de Timeout: %.3f seg.",0.002*timeoutWeb);
+        sprintf(timeout_web_cadena,"SERVIDOR => WEB Timeout: %.3f seg.",0.002*timeoutWeb);
         debug_enviar(timeout_web_cadena);
         debug_enviar("\n");
     } 
