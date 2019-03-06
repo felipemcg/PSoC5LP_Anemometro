@@ -719,30 +719,30 @@ void configServidor () {
     int8_t valor_retorno_esp8266 = -1;  
     
     //Ponemos el ESP8266 en modo SoftAP (Access Point) para que una PC o telefono pueda conectarse a el.
-    debug_enviar("SERVIDOR: Configurando ESP8266 en modo Estacion+Punto de acceso.");
+    debug_enviar("SERVIDOR => CFG AP+SOFTAP.");
     debug_enviar("\n");
     valor_retorno_esp8266 = esp8266_wifi_modo(3);
     while(valor_retorno_esp8266 != 0){
         valor_retorno_esp8266 = esp8266_wifi_modo(3);
     }
-    debug_enviar("SERVIDOR: Configuracion exitosa.");
+    debug_enviar("SERVIDOR => CFG AP+SOFTAP: OK.");
     debug_enviar("\n");
-    debug_enviar("SERVIDOR: Creando el punto de acceso.");
+    debug_enviar("SERVIDOR => START SOFTAP.");
     debug_enviar("\n");
     valor_retorno_esp8266 = esp8266_crear_softAP("WTIM-01","12345678",5,0,2);
     while(valor_retorno_esp8266 != 0){
         valor_retorno_esp8266 = esp8266_crear_softAP("WTIM-01","12345678",5,0,1);
     }
-    debug_enviar("SERVIDOR: Configuracion exitosa.");
+    debug_enviar("SERVIDOR => START SOFTAP: OK.");
     debug_enviar("\n");
     // Creamos un socket servidor
-    debug_enviar("SERVIDOR: Creando servidor en el ESP8266.");
+    debug_enviar("SERVIDOR => START WEBSRV.");
     debug_enviar("\n");
 	idSocketServ = esp8266_crear_servidor_tcp(80,1);
     while( idSocketServ != 0){
         idSocketServ = esp8266_crear_servidor_tcp(80,1);
     }
-    debug_enviar("SERVIDOR: Configuracion exitosa.");
+    debug_enviar("SERVIDOR => START WEBSRV: OK.");
     debug_enviar("\n");
 	
 	// seteamos las variables globales con valores iniciales
