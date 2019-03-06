@@ -45,23 +45,10 @@ int main(void)
     {
         /*Se encarga de gestionar la conexion al servidor y a la red WiFi, tambien 
         realiza las funcioens de escritura, lectura y cierre del socket.*/
-       estado_modulo_esp8266();
-    
-        /*Verifica primero que se haya establecido una conexion al servidor y que el socket esta 
-        listo para recibir datos*/
-        retval = TII_ReceivePacket(&bufferPaqueteRecibido[0],0);
-        /*Verifica si se recibierion datos a traves del socket*/
-        if(retval == 1){
-            packet1451_in = TIM_GetPacket(&bufferPaqueteRecibido[0]);
-            /*Llamar a procces packet*/
-            TIM_ProcessPacket(&packet1451_in);
-            retval = 0;
-        }else{
-            /*No se recibio ningun paquete*/
-        }  
+        estado_modulo_esp8266();
+        TIM_Process();  
         servidorWeb();
         debug_procesador_comandos();
-
         CyDelay(500);
     }
 }

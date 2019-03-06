@@ -19,6 +19,7 @@
 #include "servidor_web_banderas.h"
 #include "eeprom.h"
 #include "interfaz_debug.h"
+#include "TII.h"
 
 /*Bandera para indicar si el TIM se encuentra conectada a la red WiFi*/
 static bool b_estado_wifi_tim = false;
@@ -250,6 +251,11 @@ void estado_escribir_datos_tcp(void){
     /*Se verifica que la aplicacion haya solicitado enviar datos*/
     respuesta_esp = esp8266_enviar_datos_tcp(sock,g_tam_tcp_tx,(char*)g_tcp_tx_buffer);
     b_app_enviar_datos = 0;
+    
+    rst_b_paquete_tim_recibido();
+    rst_b_paquete_tim_separado();
+    rst_b_paquete_tim_procesado();
+    
     if(b_cambio_config == 0)
     {
         if(respuesta_esp == -2)
@@ -274,7 +280,7 @@ void estado_leer_datos_tcp(void){
     debug_enviar("ME-ESP8266 => Estado: Leer datos TCP => Tam paquete: ");
     debug_enviar(buffer_debug);
     debug_enviar("\n");
-    b_app_recibir_datos = 0;
+    b_app_recibir_datos = false;
     if(b_cambio_config == 0)
     {
         if(cant_bytes_tcp_recibidos >= 0)

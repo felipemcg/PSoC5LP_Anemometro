@@ -22,26 +22,9 @@
 bool b_me_esp8266_datos_recibidos = false; 
 bool b_me_esp8266_datos_enviados = false;  
 
-cmd_in TIM_GetPacket(uint8_t *buffer){
-    debug_enviar("TII => Obtener paquete");
-    debug_enviar("\n");
-    cmd_in packet_in; 
-    packet_in.transd = (uint16)((buffer[0]<<8)+(buffer[1]<<0));
-    packet_in.cmd_class = buffer[2];
-    packet_in.cmd_func = buffer[3];
-    packet_in.length = (uint16)((buffer[4]<<8)+(buffer[5]<<0));
-    
-    
-//    for(i=0;i<packet1451->length;i++){
-//        packet1451->payload[i] = buffer[6+i];
-//    }
-	
-//    for(i=0;i<48;i++){
-//        buffer[i] = 0;
-//    }
-    
-    return packet_in;
-}
+bool b_paquete_tim_recibido = false;
+bool b_paquete_tim_separado = false; 
+bool b_paquete_tim_procesado = false;
 
 uint8 TII_ReceivePacket(uint8 *buffer, uint8 length){
     uint16_t tam_paquete_tcp = 0;
@@ -59,28 +42,67 @@ uint8 TII_ReceivePacket(uint8 *buffer, uint8 length){
 //        rst_tam_paquete_datos_tcp();
 //        return 1; 
 //    }
-    set_b_app_recibir_datos(); 
-    tam_paquete_tcp = get_tam_paquete_recibido_dato_tcp();
-    if(tam_paquete_tcp > 0){
-        memcpy((uint8_t*)buffer,g_tcp_rx_buffer,tam_paquete_tcp);
-        memset(g_tcp_rx_buffer,0,sizeof(g_tcp_rx_buffer));
-        rst_tam_paquete_recibido_dato_tcp();
-        debug_enviar("TII => Recibido: ");
-        debug_enviar((char*)buffer);
-        debug_enviar("\n");
-        return 1; 
-    } 
+    
+    //Se verifica que no se este procesando un paquete, antes de recibir otro. 
+    if(b_paquete_tim_recibido  == false)
+    {
+        set_b_app_recibir_datos(); 
+        tam_paquete_tcp = get_tam_paquete_recibido_dato_tcp();
+        
+        //Se verifica si hay datos disponibles en el socket. 
+        if(tam_paquete_tcp > 0)
+        {
+            rst_b_app_recibir_datos();
+            
+            memcpy((uint8_t*)buffer,g_tcp_rx_buffer,tam_paquete_tcp);
+            memset(g_tcp_rx_buffer,0,sizeof(g_tcp_rx_buffer));
+            rst_tam_paquete_recibido_dato_tcp();
+            
+            debug_enviar("TII => Recibido: ");
+            debug_enviar((char*)buffer);
+            debug_enviar("\n");
+            
+            b_paquete_tim_recibido = true;
+            return 1; 
+        }
+    }
     return 0;    
 }
 
-uint8 TII_SendPacket(uint8 *packet, uint8 packet_len){
-    set_b_app_recibir_datos();
-    memcpy(g_tcp_tx_buffer,packet,packet_len);
-    g_tam_tcp_tx = packet_len;		
-    debug_enviar("TII => Enviar: ");
-    debug_enviar((char*)packet);
+cmd_in TIM_GetPacket(uint8_t *buffer){
+    cmd_in packet_in; 
+    
+    
+    debug_enviar("TII => Obtener paquete");
     debug_enviar("\n");
-    return 1;
+    
+    packet_in.transd = (uint16)((buffer[0]<<8)+(buffer[1]<<0));
+    packet_in.cmd_class = buffer[2];
+    packet_in.cmd_func = buffer[3];
+    packet_in.length = (uint16)((buffer[4]<<8)+(buffer[5]<<0));
+    
+    return packet_in; 
+//    for(i=0;i<packet1451->length;i++){
+//        packet1451->payload[i] = buffer[6+i];
+//    }
+
+//    for(i=0;i<48;i++){
+//        buffer[i] = 0;
+//    }  
+}
+
+uint8 TII_SendPacket(uint8 *packet, uint8 packet_len){
+    if(get_b_app_cerrar_socket() || get_b_app_recibir_datos()){
+       return 0; 
+    }else{
+        set_b_app_enviar_datos();
+        memcpy(g_tcp_tx_buffer,packet,packet_len);
+        g_tam_tcp_tx = packet_len;		
+        debug_enviar("TII => Enviar: ");
+        debug_enviar((char*)packet);
+        debug_enviar("\n"); 
+        return 1;
+    }
 }
 // Funcion que envia la senal digitalizada
 //void TII_SendSignal(void){
@@ -329,5 +351,44 @@ void TIM_ProcessPacket(cmd_in *packet_in){
     break; 
     }
     return;
+}
+
+void TIM_Process(void){
+    uint8_t paquete_TIM_recibido[20];
+    cmd_in packet1451_in;
+    
+    
+    if(b_paquete_tim_recibido == false){
+        //Se recibe un paquete del NCAP. 
+        TII_ReceivePacket(&paquete_TIM_recibido[0],0);
+    }
+    if(b_paquete_tim_recibido == true && b_paquete_tim_separado == false)
+    {
+        //Se separa el paquete crudo para construir el paquete 1451. 
+        packet1451_in = TIM_GetPacket(&paquete_TIM_recibido[0]);
+        b_paquete_tim_separado = true;
+    }
+    if(b_paquete_tim_recibido == true && b_paquete_tim_separado == true 
+        && b_paquete_tim_procesado == false)
+    {
+        /*Se procesa el paquete 1451*/
+        TIM_ProcessPacket(&packet1451_in);
+        b_paquete_tim_procesado = true;
+    }
+    
+    return; 
+} 
+    
+
+void rst_b_paquete_tim_recibido(void){
+    b_paquete_tim_recibido = false;
+}
+
+void rst_b_paquete_tim_separado(void){
+    b_paquete_tim_separado = false;
+}
+
+void rst_b_paquete_tim_procesado(void){
+    b_paquete_tim_procesado = false;
 }
 

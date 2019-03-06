@@ -22,5 +22,11 @@
     cmd_in TIM_GetPacket(uint8_t *buffer);
     void TIM_ProcessPacket(cmd_in *packet_in);
     
+    void rst_b_paquete_tim_recibido(void);
+    void rst_b_paquete_tim_separado(void);
+    void rst_b_paquete_tim_procesado(void);
+    
+    void TIM_Process(void);
+    
 #endif
 
