@@ -225,7 +225,7 @@ void TIM_ReadTransducerChannel(cmd_in *pack_1451,cmd_reply * pack_reply_ptr){
     return;
 }
 
-void TII_PackReply(cmd_reply * pack_reply_ptr, uint8  buffer[48]){
+void TII_PackReply(cmd_reply * pack_reply_ptr, uint8  *buffer){
     uint8 i;   
     buffer[0] = pack_reply_ptr->sf;
     buffer[1] = (uint8)(pack_reply_ptr->length>>8) & 0xFF;
