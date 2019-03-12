@@ -15,10 +15,6 @@
 volatile cmd_status g_cmd_estado = cmd_procesando;
 uint8_t g_tcp_tx_buffer[TCP_TX_BUFFER_SIZE] = {0}; 
 uint8_t g_tcp_rx_buffer[TCP_RX_BUFFER_SIZE] = {0}; 
-bool gb_socket_listo = 0;
-bool gb_enviar_datos_tcp = 0;
-bool gb_leer_datos_tcp = 0;
-bool gb_cerrar_socket_tcp = 0;
 uint16_t g_tam_tcp_tx = 0;
     /*--------*/
 

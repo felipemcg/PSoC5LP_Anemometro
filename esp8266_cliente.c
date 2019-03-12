@@ -29,6 +29,9 @@ static bool b_estado_ncap_tim = false;
 
 static bool b_cambio_config_ap = false; 
 static bool b_cambio_config_ncap = false;
+
+/*Bandera para indicar si el portal WEB modifico los valores actuales de configuracion,
+que son los datos del punto de acceso(AP) y del NCAP.*/
 static bool b_cambio_config = false; 
 
 static bool b_app_enviar_datos = false; 
@@ -72,7 +75,6 @@ volatile static int8_t sock;
 void estado_encendido(void){
     debug_enviar("ME-ESP8266 => Estado: Verificar encendido.");
     debug_enviar("\n");
-    gb_socket_listo = 0;
     respuesta_esp = esp8266_verificar_encedido();
     if(respuesta_esp == 0){
         estado_modulo_esp8266 = estado_leer_datos_tim; 
@@ -124,7 +126,6 @@ void estado_conectar_wifi(void){
     debug_enviar("ME-ESP8266 => Estado: Conectar WiFi.");
     debug_enviar("\n");
     b_estado_wifi_tim = false;
-    gb_socket_listo = 0;
     respuesta_esp = esp8266_conectar_estacion(configuracion_TIM.SSID_AP,
         configuracion_TIM.pwdAP);
     if(b_cambio_config == 1)
@@ -182,7 +183,6 @@ void estado_conectar_servidor_tcp(void){
         if(sock >= 0)
         {
             b_estado_ncap_tim = true;
-            gb_socket_listo = 1;
             estado_modulo_esp8266 = estado_espera_instruccion_aplicacion;
         } 
         if(sock == -1)
