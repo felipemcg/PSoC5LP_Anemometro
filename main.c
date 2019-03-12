@@ -18,9 +18,6 @@ uint8_t g_tcp_rx_buffer[TCP_RX_BUFFER_SIZE] = {0};
 uint16_t g_tam_tcp_tx = 0;
     /*--------*/
 
-uint8_t bufferPaqueteRecibido[20];
-cmd_in packet1451_in;
-
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
@@ -29,12 +26,6 @@ int main(void)
     incializar_esp8266();
     UART_DEBUG_Start();
     EEPROM_CONFIGURACION_Start();
-    /*----------------------*/
-
-    debug_enviar("Inicio de sistema.");
-    uint8_t retval = 0;
-    
-    debug_enviar("Configuracion Servidor");
     configServidor();
     iniciar_me_esp8266_modo_cliente();
     for(;;)
