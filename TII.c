@@ -9,8 +9,6 @@
  *
  * ========================================
 */
-
-/* [] END OF FILE */
 #include "project.h"
 #include "Datatype.h"
 #include "ESP8266.h"
@@ -123,7 +121,7 @@ uint8 TII_SendPacket(uint8 *packet, uint8 packet_len){
 //}
 
 
-void TIM_ReadTransducerChannel(cmd_in *pack_1451,cmd_reply * pack_reply_ptr){
+void TIM_ReadTransducerChannel(cmd_in *pack_1451, cmd_reply * pack_reply_ptr){
 
     uint8 j=0;
     uint8 temp_packet[8] = {0};
@@ -132,79 +130,43 @@ void TIM_ReadTransducerChannel(cmd_in *pack_1451,cmd_reply * pack_reply_ptr){
 		pack_reply_ptr->length = (uint16)0x04; //El tamaño del payload es de 4 bytes.
         /* Se lee el canal */
 		if(pack_1451->transd == 0x01){//Se lee la temperatura del aire
-		    //WakeComponents();
-            //INICIALIZACION2();
-			//RTC_EnableInt();
-		   	//Encender_5V_Analog();
-			//Apagar_5V_Analog();
-			//SleepComponents();
-			//WakeUp_ISR_Disable();
-			//txdcr_measurement = SHT25_Temperatura();
             txdcr_measurement = 0;
-			//CyPins_SetPin(LED1_0);
-			//WakeUp_ISR_Enable();
         }
 		else if(pack_1451->transd == 0x02){//Se lee la humedad del aire
-				//WakeUp_ISR_Disable();
-				//txdcr_measurement = SHT25_Humedad();
                 txdcr_measurement = 0;
-				//WakeUp_ISR_Enable();
 	        }
 		else if(pack_1451->transd == 0x03){//Velocidad
-	        	//CyPins_SetPin(LED1_0);
-				//WakeUp_ISR_Disable();
-				//Principal(viento);
 				txdcr_measurement = 0.02;
 				txdcr_measurement1 = 0.1;
-				//CyPins_SetPin(LED_0);
-				//txdcr_measurement = 50;
+				/*Principal(viento);
+				txdcr_measurement = viento[0];
+				txdcr_measurement1 = viento[1];*/
 				pack_reply_ptr->length = (uint16)0x08; //El tamaño del payload es de 8 bytes.
-				//WakeUp_ISR_Enable();
 	        }	
 		else if(pack_1451->transd == 0x04){//Angulo, actual nada
-	        	//txdcr_measurement = MEDIR_BATERIA();
-				//CyPins_SetPin(LED_0);
-				//WakeUp_ISR_Disable();
-                //Principal(viento);
-				//txdcr_measurement = viento[1];
-				//WakeUp_ISR_Enable();
+	        	/*Principal(viento);
+				txdcr_measurement = viento[1];*/
 	        }
 		else if(pack_1451->transd == 0x05){//Bateria
-	        	//txdcr_measurement = MEDIR_BATERIA();
-				//CyPins_SetPin(LED_0);
-				//WakeUp_ISR_Disable();
-				//txdcr_measurement = MEDIR_BATERIA();
                 txdcr_measurement =0;
-				//WakeUp_ISR_Enable();
 	        }
         else if(pack_1451->transd == 0x06){//Calibracion actual tof1 y tof2
-	        	//CyPins_SetPin(LED1_0);
-				//WakeUp_ISR_Disable();
-				//CalibracionCero();
-				//txdcr_measurement = viento[0];//velocidad(actual velocidad1)
-				//txdcr_measurement1 = viento[1];//angulo(actual velocidad2)
-				//CyPins_SetPin(LED_0);
-				//txdcr_measurement = 50;
+				/*CalibracionCero();
+				txdcr_measurement = viento[0];//velocidad(actual velocidad1)
+				txdcr_measurement1 = viento[1];//angulo(actual velocidad2)*/
 				pack_reply_ptr->length = (uint16)0x08; //El tamaño del payload es de 8 bytes.
-				//WakeUp_ISR_Enable();
 	        }	
 
-		temp_packet[j] = *((uint8 *)(&txdcr_measurement)+3);
-        temp_packet[j+1] = *((uint8 *)(&txdcr_measurement)+2);
-        temp_packet[j+2] = *((uint8 *)(&txdcr_measurement)+1);
-        temp_packet[j+3] = *((uint8 *)(&txdcr_measurement)+0);
-		
-		temp_packet[j+4] = *((uint8 *)(&txdcr_measurement1)+3);
-        temp_packet[j+5] = *((uint8 *)(&txdcr_measurement1)+2);
-        temp_packet[j+6] = *((uint8 *)(&txdcr_measurement1)+1);
-        temp_packet[j+7] = *((uint8 *)(&txdcr_measurement1)+0);
-    
-//		sprintf(bufprueba, "Valor:%3.3f Byte1:%x Byte2:%x Byte3:%x Byte4:%x ", txdcr_measurement,temp_packet[0],temp_packet[1],temp_packet[2],temp_packet[3]);
-//		UART_PutString(bufprueba);
-//		UART_PutChar(ENTER);
-//		UART_PutChar(RETRO);
-//		CyDelay(500);
-		
+	temp_packet[j] = *((uint8 *)(&txdcr_measurement)+3);
+    temp_packet[j+1] = *((uint8 *)(&txdcr_measurement)+2);
+    temp_packet[j+2] = *((uint8 *)(&txdcr_measurement)+1);
+    temp_packet[j+3] = *((uint8 *)(&txdcr_measurement)+0);
+	
+	temp_packet[j+4] = *((uint8 *)(&txdcr_measurement1)+3);
+    temp_packet[j+5] = *((uint8 *)(&txdcr_measurement1)+2);
+    temp_packet[j+6] = *((uint8 *)(&txdcr_measurement1)+1);
+    temp_packet[j+7] = *((uint8 *)(&txdcr_measurement1)+0);
+    	
     /* Se construye el paquete de respuesta*/
     //Encabezado
     pack_reply_ptr->sf = 0x01;
@@ -400,4 +362,5 @@ void rst_b_paquete_tim_separado(void){
 void rst_b_paquete_tim_procesado(void){
     b_paquete_tim_procesado = false;
 }
+/* [] END OF FILE */
 
