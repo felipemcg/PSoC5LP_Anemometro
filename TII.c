@@ -26,23 +26,17 @@ bool b_paquete_tim_recibido = false;
 bool b_paquete_tim_separado = false; 
 bool b_paquete_tim_procesado = false;
 
+/*
+Funcion que se encarga de recibir un paquete proveniente del NCAP a traves del socket
+TCP que proporciona el ESP8266 a traves de la maquina de estados en el archivo 
+esp8266_cliente.c.  
+Parametros:
+    *buffer -> Puntero al array donde se almacena el paquete recibido.  
+Retorno: 
+    0   -> L.
+*/
 uint8 TII_ReceivePacket(uint8 *buffer, uint8 length){
     uint16_t tam_paquete_tcp = 0;
-    // Falta verificar que hace para quedarse escuchando los paquetes recibdos.
-//    if( //espera instruccion){
-//        set_b_app_recibir_datos();
-//    }
-//    if( //datos recibidos){ 
-//        
-//    }
-    
-//    if(tam_paquete_tcp > 0){
-//        memcpy((uint8_t*)buffer,g_tcp_rx_buffer,tam_paquete_tcp);
-//        memset(g_tcp_rx_buffer,0,sizeof(g_tcp_rx_buffer));
-//        rst_tam_paquete_datos_tcp();
-//        return 1; 
-//    }
-    
     //Se verifica que no se este procesando un paquete, antes de recibir otro. 
     if(b_paquete_tim_recibido  == false)
     {
@@ -69,10 +63,20 @@ uint8 TII_ReceivePacket(uint8 *buffer, uint8 length){
     return 0;    
 }
 
+/*
+Funcion que separa el paquete crudo recibido de manera tal a construir el paquete de
+mensaje de comando 1451 segun como se define en la tabla 12 de la seccion 6.2 del 
+documento 1451.0.pdf. 
+Parametros:
+    *buffer -> Puntero al array donde se encuentra almacenado el paquete recibido.
+    Obs: La funcion TII_ReceivePacket() se encarga de cargar el array que debe recibir
+    esta funcion.
+Retorno: 
+    packet_in   -> Se retorna el paquete 1451.  
+*/
 cmd_in TIM_GetPacket(uint8_t *buffer){
     cmd_in packet_in; 
-    
-    
+   
     debug_enviar("TII => Obtener paquete");
     debug_enviar("\n");
     
@@ -80,15 +84,11 @@ cmd_in TIM_GetPacket(uint8_t *buffer){
     packet_in.cmd_class = buffer[2];
     packet_in.cmd_func = buffer[3];
     packet_in.length = (uint16)((buffer[4]<<8)+(buffer[5]<<0));
+    for(int i=0;i<packet_in.length;i++){
+        packet_in.payload[i] = buffer[6+i];
+    }
     
     return packet_in; 
-//    for(i=0;i<packet1451->length;i++){
-//        packet1451->payload[i] = buffer[6+i];
-//    }
-
-//    for(i=0;i<48;i++){
-//        buffer[i] = 0;
-//    }  
 }
 
 uint8 TII_SendPacket(uint8 *packet, uint8 packet_len){
@@ -237,6 +237,15 @@ void TII_PackReply(cmd_reply * pack_reply_ptr, uint8  *buffer){
     return;
 }
 
+/*
+Funcion que procesa el comando 1451 recibido, y realiza las acciones correspondientes. 
+Parametros:
+    *buffer -> Puntero al array donde se encuentra almacenado el paquete recibido.
+    Obs: La funcion TII_ReceivePacket() se encarga de cargar el array que debe recibir
+    esta funcion.
+Retorno: 
+    packet_in   -> Se retorna el paquete 1451.  
+*/
 void TIM_ProcessPacket(cmd_in *packet_in){
     debug_enviar("TII => Procesar Paquete");
     debug_enviar("\n");
