@@ -20,8 +20,13 @@
 bool b_me_esp8266_datos_recibidos = false; 
 bool b_me_esp8266_datos_enviados = false;  
 
+//Bandera que indica que se recibio un paquete TIM a traves del socket TCP. 
 bool b_paquete_tim_recibido = false;
+
+//Bandera que indica que el paquete TIM fue separado en sus campos correspondientes.
 bool b_paquete_tim_separado = false; 
+
+//Bandera que indica que el paquete TIM fue procesado.
 bool b_paquete_tim_procesado = false;
 
 /*
