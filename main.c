@@ -36,7 +36,7 @@ int main(void)
         TIM_Process();  
         servidorWeb();
         debug_procesador_comandos();
-        CyDelay(500);
+        //CyDelay(500);
     }
 }
 
