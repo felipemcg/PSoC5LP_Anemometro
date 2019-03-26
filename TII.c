@@ -335,6 +335,7 @@ void TIM_Process(void){
     
     
     if(b_paquete_tim_recibido == false){
+        memset(paquete_TIM_recibido,0,sizeof(paquete_TIM_recibido));
         //Se recibe un paquete del NCAP. 
         TII_ReceivePacket(&paquete_TIM_recibido[0],0);
     }
