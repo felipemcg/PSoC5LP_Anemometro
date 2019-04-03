@@ -256,7 +256,7 @@
       <Data key="495ea972-4057-4a5d-9966-2ffaa7a700f5" value="TX_DEBUG" />
       <Data key="8182c105-2e94-487b-9df6-e2622b19a464" value="RX_DEBUG" />
       <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="RX_ESP" />
-      <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="DB1" />
+      <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="ENABLE_ESP" />
       <Data key="ed092b9b-d398-4703-be89-cebf998501f6" value="TX_ESP" />
     </Group>
   </Group>
@@ -3371,7 +3371,7 @@
     </Group>
     <Group key="e851a3b9-efb8-48be-bbb8-b303b216c393">
       <Group key="0">
-        <Data key="Port Format" value="12,5" />
+        <Data key="Port Format" value="0,5" />
       </Group>
     </Group>
     <Group key="ed092b9b-d398-4703-be89-cebf998501f6">

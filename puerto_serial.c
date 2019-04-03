@@ -44,6 +44,8 @@ void incializar_esp8266(){
     timeout_uart_esp8266 = 0;
     UART_ESP_ClearTxBuffer();
     UART_ESP_ClearRxBuffer();
+    ENABLE_ESP_Write(1);
+    CyDelay(100);
     return;
 }
 
