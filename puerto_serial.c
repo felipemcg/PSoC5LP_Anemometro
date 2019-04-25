@@ -237,19 +237,27 @@ retorno_interrupcion:
 
 void uart_enviar_datos(uint8_t *buf, uint16_t tam)
 {
-    g_cmd_estado = cmd_recibiendo;
-    if(1==1){
-        //UART_ESP_ClearTxBuffer();
-        
-        /*Funcion bloqueante, retorna cuando se pasaron cargaron todos los datos al 
-        buffer de transmision, sin embargo, no signica que fueron transmitidos todos*/
+    volatile uint8_t tx_status; 
+    if(cmd_estado == cmd_procesando)
+    {
+        /*Funcion bloqueante, retorna cuando se pasaron cargaron todos los datos 
+        al buffer de transmision software. Obs: al retornar no significa que 
+        ya fueron transmitidos todos los Bytes.*/
         UART_ESP_PutArray(buf,tam);
         
-        /*Espera que se transmitan todos los Bytes almacenados en el buffer. Obs: no
-        se tiene en cuenta los 4 Bytes del FIFO Hardware.*/
-        //while(UART_ESP_GetTxBufferSize > 0);
-    }
-     
+        /*Espera que se transmitan todos los Bytes almacenados en el 
+        FIFO Software,FIFO hardware y que se transmita correctamente el 
+        ultimo byte.*/
+        do{
+            /*Observar el comportamiento al utilizar ReadTxStatus(), debido a 
+            que al llamar esta funcion, se limpian algunos bits.*/
+            tx_status = UART_ESP_ReadTxStatus();
+        }while( (UART_ESP_GetTxBufferSize() > 0) 
+                || !(tx_status & UART_TX_STS_FIFO_EMPTY)
+                || !(tx_status & UART_TX_STS_COMPLETE)); 
+        
+        cmd_estado = cmd_recibiendo;
+    } 
 }
 
 uint8_t uart_leer_datos(uint8_t *buffer)
