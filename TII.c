@@ -141,16 +141,18 @@ void TIM_ReadTransducerChannel(cmd_in *pack_1451, cmd_reply * pack_reply_ptr){
                 txdcr_measurement = 0;
 	        }
 		else if(pack_1451->transd == 0x03){//Velocidad
-				txdcr_measurement = 0.02;
-				txdcr_measurement1 = 0.1;
+				txdcr_measurement = 0.05;
+				//txdcr_measurement1 = 0.1;
 				/*Principal(viento);
 				txdcr_measurement = viento[0];
 				txdcr_measurement1 = viento[1];*/
-				pack_reply_ptr->length = (uint16)0x08; //El tamaño del payload es de 8 bytes.
+				pack_reply_ptr->length = (uint16)0x04; 
 	        }	
 		else if(pack_1451->transd == 0x04){//Angulo, actual nada
 	        	/*Principal(viento);
 				txdcr_measurement = viento[1];*/
+                txdcr_measurement = 86.1;
+                pack_reply_ptr->length = (uint16)0x04; 
 	        }
 		else if(pack_1451->transd == 0x05){//Bateria
                 txdcr_measurement =0;
