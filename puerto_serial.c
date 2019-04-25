@@ -30,6 +30,9 @@ static volatile uint8_t posicion_comienzo_datos = 0;
 static volatile uint16_t tam_paquete_datos_tcp = 0;
 static volatile uint16_t timeout_uart_esp8266; 
 
+typedef enum  {cmd_procesando, cmd_recibiendo} cmd_status;
+static cmd_status cmd_estado = cmd_procesando;
+
 CY_ISR(contador_timeout_esp8266){
     Timer_esp8266_ReadStatusRegister();
     timeout_uart_esp8266++; 

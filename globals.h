@@ -38,12 +38,9 @@
     volatile uint8_t serialCircBuffer[SERIAL_BUFFER_SIZE]; 
     /*----------*/
 
-    
-    typedef enum  {cmd_procesando, cmd_recibiendo} cmd_status;
-    
     /*Declaracion de variables globales*/
     //gb_ : global bool variable 
-    extern volatile cmd_status g_cmd_estado;
+    
     extern uint16_t g_tam_tcp_tx;
     extern uint8_t g_tcp_tx_buffer[TCP_TX_BUFFER_SIZE]; 
     extern uint8_t g_tcp_rx_buffer[TCP_RX_BUFFER_SIZE];
