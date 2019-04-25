@@ -265,33 +265,24 @@ uint8_t uart_leer_datos(uint8_t *buffer)
     uint16_t valor_retorno = 0;
     int8_t ret_uart;
     
-    timeout_uart_esp8266 = 0;
-    num_bytes_recibidos = 0;
-    
-    /*Bloqueaante, espera a recibir todo el paquete de respuesta del modulo.*/
-    do 
+    if(cmd_estado == cmd_recibiendo)
     {
+        memset(buffer,'\0',sizeof(*buffer));
+
+        /*Bloqueaante, espera a recibir todo el paquete de respuesta del modulo.*/
         ret_uart = uart_espera_paquete(buffer,TIMEOUT_RECEPCION_UART_ESP8266);
-    }while( ret_uart == 1 );
-    
-    if(ret_uart == 0)
-    {
-        /*Se indica que el sistema esta procesando el paquete recibido.*/
-        g_cmd_estado = cmd_procesando; 
-       
-        valor_retorno = num_bytes_recibidos;
-        
-        /*Se resetea el contador de Bytes de recepcion*/
-        num_bytes_recibidos = 0;
-    }else if(ret_uart == -1)
-    {  
-        buffer[0] = '\0';
-        valor_retorno = 0;
-    }else if(ret_uart == -2)
-    {
-        buffer[0] = '\0';
-        valor_retorno = 0;
-    }
+
+        if(ret_uart == 0)
+        {
+            /*Se indica que el sistema esta procesando el paquete recibido.*/
+            cmd_estado = cmd_procesando;
+            valor_retorno = num_bytes_recibidos;
+        }else
+        {
+            buffer[0] = '\0';
+            valor_retorno = 0;
+        }
+    } 
     return valor_retorno;
 }
 
