@@ -86,13 +86,13 @@ int8_t esp8266_reiniciar_modulo()
 }
 
 /**
-Funcion que cambia la tasa de transferencia del periferico UART del modulo. 
-    @param baud_rate    Nueva tasa de transferecia a ser utilizada para la 
-    comunicacion a traves del UART.  
-    @retval 0       La tasa de transferencia fue modificada con exito. Luego de 
-    recibir esta respuesta, se debe esperar al menos 5 milisegundos 
-    antes de enviar otro comando.
-    @retval -1      Tasa de transferencia fuera de rango.
+Funcion que cambia la velocidad de transmisión del periférico UART, utilizado por el 
+módulo para comunicarse con el micro-controlador externo.
+    @param baud_rate    Velocidad de transmisión deseada. El rango permitido para este
+	parámetro va desde 9600 a 921600. 
+    @retval 0       El cambio de velocidad se realizo con éxito. Es necesario esperar al
+	menos 5 ms para enviar el siguiente comando utilizando la nueva velocidad.
+    @retval -1      Error, el parámetro baud_rate se encuentra fuera de rango.
 */
 int8_t esp8266_configurar_uart(uint32_t baud_rate)
 {
@@ -164,7 +164,8 @@ int8_t esp8266_escanear_estaciones(struct elementos_punto_acceso aps){
 
 /**            
 Funcion que cambia el modo WiFi del modulo.  
-    @param modo_wifi                   
+    @param modo_wifi  0 WiFi apagado, 1 modo estacion, 2 modo punto de acceso, 
+    3 modo estacion + punto de acceso.                 
     @retval  0  El modo fue establecido correctamente.  
     @retval -1  Parametro modo_wifi fuera de rango.
     @retval -2  No se pudo establecer la configuracion deseada.
@@ -198,17 +199,18 @@ int8_t esp8266_wifi_modo(uint8_t modo_wifi){
 }
 
 /**
-Funcion que configura la interfaz de estacion antes de conectarse a un punto de acceso.  
-    @param ip      Direccion IP del modulo ESP8266. 
-    @param dns     Direccion del servidor DNS para el modulo ESP8266. 
-    @param gateway Direccion de la puerta de enlace para el modulo ESP8266. 
-    @param subnet  Direccion de mascara de red para el modulo ESP8266.
-    @retval 0   No hay error, el modulo esta funcionando. 
-    @retval -1  No se recibe respuesta del modulo.
-    @retval -2  Se supero el tiempo de espera para la conexion.
-    @retval -3  Contraseña Incorrecta.
-    @retval -4  No se encuentra/no esta disponible el SSID
-    @retval -5  Escaneo completo pero no se conecto.
+	Funcion que configura de forma manual los parámetros de la interfaz de red de la estación, 
+	desactivando la asignación por DHCP.  
+    @param ip      Dirección IP a ser asignada al modulo. 
+    @param dns     Dirección del servidor DNS. 
+    @param gateway Dirección de la puerta de enlace. 
+    @param subnet  Dirección de la mascara de la red.
+    @retval 0   Configuración exitosa. 
+    @retval -1  Error, dirección IP invalida.
+    @retval -2  Error, dirección DNS invalida.
+    @retval -3 	Error, dirección Gateway invalida.
+    @retval -4  Error, dirección Subnet invalida.
+    @retval -5  Error, no se pudo establecer la configuración deseada. 
 */
 int8_t esp8266_configurar_estacion(char *ip, char *dns, char* gateway, char* subnet)
 {
@@ -253,14 +255,16 @@ int8_t esp8266_configurar_estacion(char *ip, char *dns, char* gateway, char* sub
 }
 
 /**
-Funcion que conecta el ESP8266 a un punto de acceso.  
-    @param ssid Nombre del punto de acceso al cual se quiere conectar. 
-    @param pass Contraseña del punto de acceso al cual se quiere conectar. 
-    @retval  0  No hay error, el modulo esta funcionando. 
-    @retval -1  No se recibe respuesta del modulo.
-    @retval -2  Se supero el tiempo de espera para la conexion.
-    @retval -3  Contraseña incorrecta.
-    @retval -4  No se encuentra/no esta disponible el SSID
+	Comando utilizado para conectar el módulo a un punto de acceso (AP, por sus
+	siglas en ingles).  
+    @param ssid Nombre del punto de acceso al cual se desea conectar el módulo. 
+    @param pass Contraseña del punto de acceso al cual se desea conectar el módulo.
+    @retval  0  Conexión exitosa. 
+    @retval -1  Error, no se pudo establecer la conexión al punto de acceso.
+    @retval -2  Error, se alcanzo el tiempo de espera máximo (20 segundos) sin poder
+	establecer la conexión.
+    @retval -3  Error, contraseña incorrecta.
+    @retval -4  Error, no se encuentra el punto de acceso.
     @retval -5  Escaneo completo pero no se conecto.
     @retval -6  Se perdio la conexion.
     @retval -7  La radio se encuentra en reposo.
@@ -311,15 +315,16 @@ int8_t esp8266_conectar_estacion(char *ssid, char *pass){
 }
 
 /**
-Funcion que conecta el ESP8266 a un servidor remoto TCP.  
-    @param ip       Direccion IP del servidor al cual se quiere conectar. 
-    @param port     Puerto en el cual se encuentra escuchando el servidor.  
+Funcion que conecta el ESP8266 a un servidor TCP remoto.  
+    @param ip       Dirección IP del servidor al cual se quiere establecer la conexión,
+	como también puede ser un nombre de host. 
+    @param port     Puerto del servidor. Puede tener un valor máximo de 65535.  
     @retval [0..4]  La conexion se realizo con exito, se retorna el 
-    socket asignado, puede ser del 0 al 4.
-    @retval -1      El numero de puerto esta fuera de rango.
-    @retval -2      WiFi desconectado.
-    @retval -3      No hay socket disponible para crear la conexion.
-    @retval -4      Error al conectar al servidor.
+    socket asignado, puede ser del 0 al 3.
+    @retval -1      Error, el parámetro puerto esta fuera de rango.
+    @retval -2      Error, no hay una conexión WiFi activa.
+    @retval -3      Error, no hay recursos disponibles para establecer la conexión.
+    @retval -4      Error, no se pudo establecer la conexión al servidor.
 */
 int8_t esp8266_conectar_servidor_tcp(char *IP, uint16_t puerto){
     int8_t valor_retorno = -5;
@@ -358,15 +363,24 @@ int8_t esp8266_conectar_servidor_tcp(char *IP, uint16_t puerto){
 }
 
 /**
-    Funcion que envia datos a traves de un socket TCP.  
-    @param socket   Numero que indica el socket por donde se enviaran los datos. 
-    @param cant_bytes  Cantidad de bytes a ser enviados.
-    @param datos       Puntero al array donde se encuentran almacenado los datos.
+    Comando utilizado para enviar datos a través de una conexión TCP. 
+    Para utilizar este comando, es necesario primero utilizar el comando CCS, 
+    para establecer la conexión a un servidor, y/o el comando SAC, que acepta 
+    un cliente que intenta conectarse a un servidor en el modulo. 
+    @param socket   Parámetro utilizado para identificar las conexiones. 
+	Los valores permitidos para este parámetro van de 0 a 3. 
+    @param cant_bytes  Cantidad de Bytes a ser enviados. El valor máximo permitido para
+	este parámetro es 1460
+    @param datos     Puntero al array donde se encuentran almacenada la cadena de 
+    datos a ser enviados. La longitud de esta cadena debe ser igual al del 
+    parámetro cant_Bytes, en caso de que no sean iguales, los datos no serán enviados
     @retval  0      Los datos fueron enviados correctamente.
-    @retval -1      No se pudo enviar los datos a traves del socket.
-    @retval -2      El socket no esta conectado.
-    @retval -3      Cantidad de bytes para escribir fuera de rango*.
-    @retval -4      Numero de socket fuera de rango.
+    @retval -1      Error, los datos no fueron enviados.
+    @retval -2      Error, el socket no tiene una conexión activa.
+    @retval -3      Error, el parámetro cant_Bytes se encuentra fuera de rango.
+    @retval -4      Error, el parámetro socket se encuentra fuera de rango.
+    @retval -5      Error, no hay una conexión WiFi activa.
+    @retval -6      Error, el socket no utiliza el protocolo TCP.
 */
 int8_t esp8266_enviar_datos_tcp(uint8_t socket, uint16_t cant_bytes, char *data){
     int8_t valor_retorno = -1; 
@@ -421,6 +435,12 @@ int8_t esp8266_enviar_datos_tcp(uint8_t socket, uint16_t cant_bytes, char *data)
                     case CMD_ERROR_4: 
                         valor_retorno = -4;
                         break;
+                    case CMD_ERROR_5: 
+                        valor_retorno = -5;
+                        break;
+                    case CMD_ERROR_6: 
+                        valor_retorno = -6;
+                        break;
                     default: 
                         break;
                 }
@@ -474,6 +494,12 @@ int8_t esp8266_enviar_datos_tcp(uint8_t socket, uint16_t cant_bytes, char *data)
                 case CMD_ERROR_4: 
                     valor_retorno = -4;
                     break;
+                case CMD_ERROR_5: 
+                    valor_retorno = -5;
+                    break;
+                case CMD_ERROR_6: 
+                    valor_retorno = -6;
+                    break;
                 default: 
                     break;
             }
@@ -483,13 +509,18 @@ int8_t esp8266_enviar_datos_tcp(uint8_t socket, uint16_t cant_bytes, char *data)
 }
 
 /**
-Funcion que leer los datos recibidos a traves de un socket TCP.  
-    @param[in] socket   Numero que indica el socket desde donde se leeran los datos. 
+Funcion para recibir datos a través de una conexión TCP. Para utilizar 
+este comando, es necesario primero utilizar el comando CCS, para establecer la 
+conexión a un servidor, y/o el comando SAC, que acepta un cliente que 
+intenta conectarse a un servidor en el modulo
+    @param[in] socket   Parámetro utilizado para identificar las conexiones. 
+    Los valores permitidos para este parámetro van de 0 a 3. 
     @param[out] buffer  Puntero al array donde se almacenaran los datos recibidos. 
-    @retval Nro_bytes   Cantidad de bytes recibidos en el socket. 
-    @retval -1      Numero de socket fuera de rango.
-    @retval -2      WiFi desconectado.
-    @retval -3      El socket se encuentra desconectado.
+    @retval cantidad_bytes   Cantidad de bytes recibidos en el socket. 
+    @retval -1      Error, el parámetro socket se encuentra fuera de rango.
+    @retval -2      Error, no hay una conexión WiFi activa.
+    @retval -3      Error, el parámetro socket no tiene una conexión activa.
+    @retval -4 		Error, el parámetro socket no utiliza el protocolo TCP.
 */
 int16_t esp8266_leer_datos_tcp(uint8_t socket, uint8_t *buffer){
     int16_t valor_retorno = -1;
@@ -539,6 +570,9 @@ int16_t esp8266_leer_datos_tcp(uint8_t socket, uint8_t *buffer){
             case CMD_ERROR_3: 
                 valor_retorno = -3;
                 break;
+            case CMD_ERROR_4: 
+                valor_retorno = -4;
+                break;
             default: 
                 break;
         }        
@@ -547,11 +581,13 @@ int16_t esp8266_leer_datos_tcp(uint8_t socket, uint8_t *buffer){
 }
 
 /**
-Funcion que cierra un socket TCP.  
-    @param socket   Numero que indica el socket a ser cerrado. 
-    @retval  0      El socket se cerro correctamente. 
-    @retval -1      Numero de socket fuera de rango.
-    @retval -2      WiFi desconectado.
+	Comando utilizado para cerrar las conexiones activas.
+    @param socket   Parámetro utilizado para identificar las conexiones. 
+    Los valores permitidos para este parámetro van de 0 a 3. 
+    @retval  0      La conexión fue cerrada con éxito. 
+    @retval -1      Error, el parámetro socket se encuentra fuera de rango
+    @retval -2      Error, no hay una conexión WiFi activa.
+    @retval -3     	Error, el socket no tiene una conexión activa.
 */
 int8_t esp8266_cierra_socket_tcp(uint8_t socket){
     int8_t valor_retorno = -1;
@@ -576,6 +612,9 @@ int8_t esp8266_cierra_socket_tcp(uint8_t socket){
             case CMD_ERROR_2:
                 valor_retorno = -2;
                 break;
+            case CMD_ERROR_3:
+                valor_retorno = -3;
+                break;
             default: 
                 break;
             }
@@ -584,15 +623,20 @@ int8_t esp8266_cierra_socket_tcp(uint8_t socket){
 }
 
 /**
-Funcion que se encarga de crear un servidor local en el ESP8266.
-    @param puerto           Puerto por el que se escuchara a los clientes.
-    @param cant_clientes    Cantidad maxima de clientes a ser aceptados por el servidor.
-    @retval [0..4] El servidor fue creado con exito, se retorna el socket asignado,
-    puede ser del 0 al 4.
-    @retval -1      El numero de puerto esta fuera de rango.
-    @retval -2      El numero de clientes esta fuera de rango.
-    @retval -3      Ya existe un servidor en el puerto especificado.
-    @retval -4      WiFi desconectado.
+Funcion que se encarga de crear un servidor TCP en el modulo. Pueden trabajar
+en simultaneo como máximo 4 servidores.
+    @param puerto           Puerto a ser utilizado por el servidor. 
+    Puede tener un valor máximo de 65535.
+    @param cant_clientes    Especifica la cantidad de conexiones simultaneas 
+    que puede aceptar el servidor. Los valores permitidos para ese parámetro va desde 1
+	hasta 4
+    @retval [0..3] El servidor fue creado exitosamente. Se retorna un numero de socket_pasivo
+	que sera utilizado para identificar al servidor. El único comando que
+	utiliza este valor como parámetro es el comando SAC. Los valores
+	permitidos para este numero van de 0 a 3.
+    @retval -1    	Error, el parámetro puerto se encuentra fuera de rango.
+    @retval -2      Error, el parámetro cantidad_clientes se encuentra fuera de rango.
+    @retval -3      Error, no hay una conexión WiFi activa.
 */
 int8_t esp8266_crear_servidor_tcp(uint16_t puerto, uint8_t cant_clientes){
     int8_t valor_retorno = -1;
@@ -620,9 +664,6 @@ int8_t esp8266_crear_servidor_tcp(uint16_t puerto, uint8_t cant_clientes){
             case CMD_ERROR_3:
                 valor_retorno = -3;
                 break;
-            case CMD_ERROR_4:
-                valor_retorno = -4;
-                break;
             default: 
                 break;
         }
@@ -631,19 +672,25 @@ int8_t esp8266_crear_servidor_tcp(uint16_t puerto, uint8_t cant_clientes){
 }
 
 /**
-    Funcion que se encarga de aceptar a los clientes que intentan conectarse al 
-    servidor.
-    @param socket  Socket del servidor por el cual se escucha a posibles 
-    clientes. Es el socket retornado por la funcion  esp8266_crear_servidor_tcp.
-    @retval [0..4] El cliente fue aceptado por el servidor, se retorna el 
-    socket asignado,puede ser del 0 al 4.
-    @retval -1      El numero de socket esta fuera de rango.
-    @retval -2      No hay socket disponible para aceptar al cliente.
-    @retval -3      Se alcanzo el numero maximo de clientes permitidos para 
-    este servidor.
-    @retval -4      El servidor no tiene clientes pendientes.
-    @retval -5      El servidor se encuentra desactivado.
-    @retval -6      WiFi desconectado.
+Funcion para aceptar clientes que desean conectarse a un servidor
+TCP del modulo. Para utilizar esta funcion, en primer lugar se debe llamar a 
+esp8266_crear_servidor_tcp, ya que esta funcion retorna un valor que se utiliza 
+para poder aceptar a los clientes.
+    @param socket  Parámetro utilizado para identificar de cual servidor se 
+    deben aceptar los clientes. Para obtener este parámetro, se debe almacenar el
+	valor de retorno de la funcion esp8266_crear_servidor_tcp. Los valores permitidos 
+	para este parámetro van de 0 a 3.
+    @retval [0..3] El cliente fue aceptado con éxito al servidor. Se retorna un numero
+	socket de manera tal a identificar al cliente y poder intercambiar
+	datos. Los valores permitidos para este numero van de 0 a 3.
+    @retval -1      Error, el parámetro socket se encuentra fuera de rango.
+    @retval -2      Error, no hay recursos disponibles para aceptar el cliente, se rechaza
+	la conexión.
+    @retval -3      Ya se alcanzo el numero máximo de conexiones simultaneas permitidas 
+    para este servidor. Se rechaza el cliente.
+    @retval -4      El servidor no tiene clientes que quieran conectarse.
+    @retval -5      El servidor no se encuentra activo.
+    @retval -6      Error, no hay una conexión WiFi activa.
 */
 int8_t esp8266_aceptar_clientes_tcp(uint8_t socket){
     int8_t valor_retorno = -1;
@@ -688,17 +735,16 @@ int8_t esp8266_aceptar_clientes_tcp(uint8_t socket){
 }
 
 /**
-    Funcion que se encarga de configurar los parametros de red de la 
-    interfaz de softAP del modulo ESP8266.
-    @param ip       Direccion IP que se asignara a la interfaz softAP 
-    del modulo. 
-    @param gateway  Puerta de enlace a ser utilizada en la interfaz. 
-    @param subnet   Mascara de subred. 
-    @retval  0      El AP fue configurado con exito.
-    @retval -1      Direccion IP no valida.
-    @retval -2      Puerta de enlace no valida.
-    @retval -3      Mascara de subred no valida.
-    @retval -4      No se pudo aplicar la configuracion.
+    Comando utilizado para configurar de forma manual los parámetros de la 
+    interfaz de red del punto de acceso (softAP).
+    @param ip       Dirección IP a ser asignada al modulo.
+    @param gateway  Dirección de la puerta de enlace. 
+    @param subnet   Dirección de la mascara de la red. 
+    @retval  0      Configuración exitosa.
+    @retval -1      Error, dirección IP invalida.
+    @retval -2      Error, dirección Gateway invalida.
+    @retval -3      Error, dirección Subnet invalida.
+    @retval -4      Error, no se pudo aplicar la configuracion.
 */
 int8_t esp8266_configurar_softAP(char *ip, char* gateway, char* subnet)
 {
@@ -740,21 +786,21 @@ int8_t esp8266_configurar_softAP(char *ip, char* gateway, char* subnet)
 } 
 
 /**
-    Funcion que se encarga de poner el modulo ESP8266 en modo SoftAP.
-    (La IP por defecto del ESP8266 es el 192.168.4.1)
-    @param ssid    Puntero al nombre del AP a ser creado en el ESP8266 
-    (63 caracteres como maximo).
-    @param pass    Contraseña del AP (para WPA2 utilizar minimo una longitud 
-    de 8 caracteres, para dejar abierto utilizar NULL).
-    @param canal   Canal WiFi que se utilizara, de 1 a 13.
+Funcion para crear en el modulo un punto de acceso (AP, por sus
+siglas en ingles). El modo de autenticación es WPA2-PSK.
+(La IP por defecto del ESP8266 es el 192.168.4.1)
+    @param ssid    Puntero al nombre del punto de acceso. (63 caracteres como maximo)
+    @param pass    Contraseña del punto de acceso, longitud minima de 8 caracteres.
+    @param canal   Numero del canal WiFi que utilizara el punto de acceso. Valores
+	permitidos del 1 al 13
     @param oculto  0 para habilitar el broadcast del SSID, 1 para ocultarlo.
-    @param max_conn  Determina el numero maximo de dispositivos que se pueden 
-    conectar al AP (pueden conectarse hasta 4 dispositivos).
-    @retval 0    El AP fue configurado con exito.
-    @retval -1   El numero de canal esta fuera de rango.
-    @retval -2   El numero oculto esta fuera de rango.
-    @retval -3   El numero cant_dispositivos esta fuera de rango.
-    @retval -4   No se pudo crear el AP.
+    @param max_conn  Numero máximo de conexiones simultaneas que permite atender el
+	punto de acceso. Valores permitidos del 1 al 4.
+    @retval 0    El punto de acceso fue creado correctamente.
+    @retval -1   Error, el numero de canal esta fuera de rango.
+    @retval -2   Error, el parámetro ssid_oculto esta fuera de rango
+    @retval -3   Error, el parámetro max_con esta fuera de rango.
+    @retval -4   Error, no se pudo crear el punto de acceso.
 */
 int8_t esp8266_crear_softAP(char *ssid, char* pass, uint8_t canal, uint8_t oculto, uint8_t cant_dispositivos)
 {
