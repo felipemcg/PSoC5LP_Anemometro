@@ -5,9 +5,28 @@
 *
 * @date 24 de abril de 2019
 *
-* @brief Libreria de funcioness para utilizar el ESP8266
+* @brief Libreria de funciones para utilizar el ESP8266
 *
+\mainpage Descripcion 
+Esta es la libreria de funciones para interactuar con el modulo ESP8266 
+con el firmware propietario. Se utiliza un esquema sincrono y bloqueante. 
+Basicamente, se envia un comando, y se espera la respuesta a este comando 
+o que se cumpla un determinado tiempo de espera, para luego continuar con 
+la ejecucion del programa.
+
+
+\section dependencia_sec Dependencia de hardware. 
+Para utilizar esta liberia, se necesita un periférico UART, un contador multiplo de 
+2ms y un puerto de salida GPIO.
+\section platform_sec	Cambio de plataforma 
+Los drivers utilizados en esta liberia estan hechos para funcionar en el PSoC 5LP. 
+@warning En caso de querer utilizar un micro-controlador diferente, es necesario realizar 
+cambios en las siguientes funciones dentro del archivo puerto_serial.c : #uart_espera_paquete, 
+#CY_ISR, #incializar_esp8266 y #uart_enviar_datos.
 */
+
+
+
 
 #include "project.h"
 #include "globals.h"
@@ -17,15 +36,13 @@
 #include <stdlib.h>
 #include <math.h>
 
-uint8_t buffer_serial_tx[SERIAL_BUFFER_SIZE]; 
-uint8_t buffer_serial_rx[SERIAL_BUFFER_SIZE];
+uint8_t buffer_serial_tx[SERIAL_BUFFER_SIZE];	/**< Buffer utilizado para almacenar los Bytes recibidos por el puerto serial, utilizado por el ESP8266.*/
+uint8_t buffer_serial_rx[SERIAL_BUFFER_SIZE];	/**< Buffer utilizado para almacenar los Bytes a ser enviados por el puerto serial, utilizado por el ESP8266.*/
 
 struct elementos_punto_acceso puntos_acceso[16];
 
 /**
-    @brief Funcion que verifica que el modulo ESP8266 esta encendido y funcionando. 
-
-    @param  Ninguno. 
+Funcion que verifica que el modulo ESP8266 esta encendido y funcionando. 
     @retval  0  No hay error, el modulo esta funcionando.
     @retval -1  Error, no se recibe respuesta del modulo.
 */
@@ -53,7 +70,6 @@ int8_t esp8266_verificar_encedido(){
 Funcion que reinicia el modulo ESP8266. Cuando esto ocurre, se envian datos 
 no revelantes por el UART, deben ser ignorados hasta recibir el caracter R,
 lo cual indica que el modulo esta listo para recibir comandos. 
-    @param  Ninguno. 
     @retval 0   El modulo fue reiniciado correctamente y esta listo para 
     recibir comandos.
     @retval -1  Error, no se recibe respuesta del modulo.
@@ -164,8 +180,11 @@ int8_t esp8266_escanear_estaciones(struct elementos_punto_acceso aps){
 
 /**            
 Funcion que cambia el modo WiFi del modulo.  
-    @param modo_wifi  0 WiFi apagado, 1 modo estacion, 2 modo punto de acceso, 
-    3 modo estacion + punto de acceso.                 
+    @param modo_wifi
+    0	-> 	WiFi apagado  \n
+    1	-> 	Modo estacion \n
+    2 	->	Modo punto de acceso \n 
+    3 	-> 	Modo estacion + punto de acceso \n                
     @retval  0  El modo fue establecido correctamente.  
     @retval -1  Parametro modo_wifi fuera de rango.
     @retval -2  No se pudo establecer la configuracion deseada.
@@ -316,10 +335,10 @@ int8_t esp8266_conectar_estacion(char *ssid, char *pass){
 
 /**
 Funcion que conecta el ESP8266 a un servidor TCP remoto.  
-    @param ip       Dirección IP del servidor al cual se quiere establecer la conexión,
+    @param IP       Dirección IP del servidor al cual se quiere establecer la conexión,
 	como también puede ser un nombre de host. 
-    @param port     Puerto del servidor. Puede tener un valor máximo de 65535.  
-    @retval [0..4]  La conexion se realizo con exito, se retorna el 
+    @param puerto     Puerto del servidor. Puede tener un valor máximo de 65535.  
+    @retval [0..3]  La conexion se realizo con exito, se retorna el 
     socket asignado, puede ser del 0 al 3.
     @retval -1      Error, el parámetro puerto esta fuera de rango.
     @retval -2      Error, no hay una conexión WiFi activa.
@@ -367,11 +386,13 @@ int8_t esp8266_conectar_servidor_tcp(char *IP, uint16_t puerto){
     Para utilizar este comando, es necesario primero utilizar el comando CCS, 
     para establecer la conexión a un servidor, y/o el comando SAC, que acepta 
     un cliente que intenta conectarse a un servidor en el modulo. 
+	@note En caso de que el parametro #cant_bytes supere el valor de 1460, esta 
+	funcion se encarga de separar el contenido de #data en paquetes de 1460 y los 
+	envia por partes.
     @param socket   Parámetro utilizado para identificar las conexiones. 
 	Los valores permitidos para este parámetro van de 0 a 3. 
-    @param cant_bytes  Cantidad de Bytes a ser enviados. El valor máximo permitido para
-	este parámetro es 1460
-    @param datos     Puntero al array donde se encuentran almacenada la cadena de 
+    @param cant_bytes  Cantidad de Bytes a ser enviados.
+    @param data     Puntero al array donde se encuentran almacenada la cadena de 
     datos a ser enviados. La longitud de esta cadena debe ser igual al del 
     parámetro cant_Bytes, en caso de que no sean iguales, los datos no serán enviados
     @retval  0      Los datos fueron enviados correctamente.
@@ -794,7 +815,7 @@ siglas en ingles). El modo de autenticación es WPA2-PSK.
     @param canal   Numero del canal WiFi que utilizara el punto de acceso. Valores
 	permitidos del 1 al 13
     @param oculto  0 para habilitar el broadcast del SSID, 1 para ocultarlo.
-    @param max_conn  Numero máximo de conexiones simultaneas que permite atender el
+    @param cant_dispositivos  Numero máximo de conexiones simultaneas que permite atender el
 	punto de acceso. Valores permitidos del 1 al 4.
     @retval 0    El punto de acceso fue creado correctamente.
     @retval -1   Error, el numero de canal esta fuera de rango.
